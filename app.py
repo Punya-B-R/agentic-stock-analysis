@@ -51,13 +51,24 @@ if analyze_btn and ticker:
                 
                 # ===== Price Chart =====
                 st.subheader("📊 Price Trends")
+                # Prepare time series chart with Date index
+                hist_df = pd.DataFrame({
+                    "Date": pd.date_range(end=datetime.now(), periods=len(data.get("price_history", []))),
+                    "Price": data.get("price_history", []),
+                    "50-Day SMA": data.get("sma_50_history", []),
+                    "200-Day SMA": data.get("sma_200_history", [])
+                }).set_index("Date")
+
+                # Melt dataframe to long format for plotly
+                hist_df_long = hist_df.reset_index().melt(id_vars="Date", var_name="Metric", value_name="Value")
+
+                # Plot with Plotly Express
                 fig = px.line(
-                    pd.DataFrame({
-                        "Price": data.get('price_history', []),
-                        "50-Day SMA": data.get('sma_50_history', []),
-                        "200-Day SMA": data.get('sma_200_history', [])
-                    }),
-                    labels={"value": "Price ($)", "index": "Date"}
+                    hist_df_long,
+                    x="Date",
+                    y="Value",
+                    color="Metric",
+                    labels={"Value": "Price ($)", "Date": "Date"}
                 )
                 st.plotly_chart(fig, use_container_width=True)
                 
