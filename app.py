@@ -62,17 +62,39 @@ if analyze_btn and ticker:
                 st.plotly_chart(fig, use_container_width=True)
                 
                 # ===== News Section =====
+                # Display News Section
                 st.subheader("📰 Latest News")
+
+               # Display News Section
+                st.subheader("📰 Top 3 News Articles")
+
                 if not data['news']:
                     st.warning("No news available")
                 else:
-                    for article in data['news']:
+                    for i, article in enumerate(data['news'][:3]):  # Only show top 3
                         if isinstance(article, dict):
-                            with st.expander(article.get('title', 'Untitled')):
-                                st.caption(f"Source: {article.get('source', 'Unknown')}")
-                                st.write(article.get('content', 'No content available')[:500] + "...")
+                            # Create columns for title + link icon
+                            col1, col2 = st.columns([0.9, 0.1])
+                            
+                            with col1:
+                                st.markdown(f"**{i+1}. {article.get('title', 'Untitled News')}**")
+                            
+                            with col2:
                                 if article.get('url'):
-                                    st.markdown(f"[Read more]({article['url']})")
+                                    st.markdown(
+                                        f"[<img src='https://cdn-icons-png.flaticon.com/512/159/159828.png' width=20>]({article['url']})",
+                                        unsafe_allow_html=True
+                                    )
+                            
+                            # Publication date and summary
+                            st.caption(f"🗓️ Published: {article.get('published_date', 'Date not available')}")
+                            
+                            # AI-generated summary (3-5 lines)
+                            summary = article.get('summary', 
+                                "No summary available. Click the link to read full article.")
+                            st.write(summary)
+                            
+                            st.divider()
                         else:
                             st.warning(str(article))  # Display API errors
                 
