@@ -6,6 +6,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 import os
 import yfinance as yf
+from advanced_recommender import AdvancedRecommender
 
 # Load environment variables
 load_dotenv()
@@ -123,17 +124,10 @@ if analyze_btn and ticker:
                             st.warning(str(article))  # Display API errors
                 
                 # ===== AI Insights =====
-                st.subheader("🤖 AI Recommendation")
-                if isinstance(data['analysis'], dict):
-                    st.success(f"Verdict: **{data['analysis'].get('recommendation', 'N/A')}**")
-                    st.markdown("**Key Points:**")
-                    for point in data['analysis'].get('key_points', []):
-                        st.write(f"- {point}")
-                    st.text_area("Full Analysis", 
-                                value=data['analysis'].get('raw', ''), 
-                                height=150)
-                else:
-                    st.warning(str(data['analysis']))
+                recommender = AdvancedRecommender()
+                adv_analysis = recommender.recommend(ticker)
+                st.subheader("🤖 Advanced AI Recommendation")
+                st.write(adv_analysis)
                 
                 st.caption(f"Last updated: {datetime.fromisoformat(data['timestamp']).strftime('%Y-%m-%d %H:%M:%S')}")
                 
