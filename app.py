@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 import os
 import yfinance as yf
 from advanced_recommender import AdvancedRecommender
+import re
 
 # Load environment variables
 load_dotenv()
@@ -128,6 +129,35 @@ if analyze_btn and ticker:
                 adv_analysis = recommender.recommend(ticker)
                 st.subheader("🤖 Advanced AI Recommendation")
                 st.write(adv_analysis)
+
+                match = re.search(r"\b(Buy|Sell|Hold)\b", adv_analysis, re.IGNORECASE)
+                if match:
+                    rec = match.group(1).capitalize()
+                    # Colors for each verdict
+                    colors = {
+                        "Buy":  ("#d4edda", "#155724"),  # light green bg, dark green border/text
+                        "Sell": ("#f8d7da", "#721c24"),  # light red  bg, dark red   border/text
+                        "Hold": ("#fff3cd", "#856404"),  # light yellow bg, dark yellow border/text
+                    }
+                    bg, fg = colors.get(rec, ("#eeeeee", "#333333"))
+                    st.markdown(
+                        f"""
+                        <div style="
+                            background-color: {bg};
+                            color: {fg};
+                            border-left: 6px solid {fg};
+                            padding: 12px;
+                            border-radius: 4px;
+                            font-size: 1.1em;
+                            font-weight: bold;
+                        ">
+                            Final Recommendation: {rec}
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+                else:
+                    st.info("🔍 Could not auto-detect a final recommendation.")
                 
                 st.caption(f"Last updated: {datetime.fromisoformat(data['timestamp']).strftime('%Y-%m-%d %H:%M:%S')}")
                 
