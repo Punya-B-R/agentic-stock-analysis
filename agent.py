@@ -21,50 +21,49 @@ class MarketAgent:
             "max_output_tokens": 1000,
         }
 
-    def analyze(self, ticker: str) -> Dict[str, Union[str, float, List]]:
-        """Main analysis pipeline"""
-        try:
-            # 1. Fetch Stock Data
-            stock_data = self._get_stock_data(ticker)
-            if "error" in stock_data:
-                return stock_data
-            
-            # 2. Fetch and Process News
-            news_data = self._get_news(ticker)
-            if "error" in news_data:
-                news_data = {"news": ["News API temporarily unavailable"]}
-            
-            # 3. Generate AI Insights
-            analysis = self._generate_analysis(
-                ticker=ticker,
-                price=stock_data["current_price"],
-                sma_50=stock_data["sma_50"],
-                sma_200=stock_data["sma_200"],
-                news_items=news_data["news"]
-            )
-            
-            return {
-                "ticker": ticker,
-                "price": stock_data.get("current_price", 0),
-                "sma_50": stock_data.get("sma_50", 0),
-                "sma_200": stock_data.get("sma_200", 0),
-                "news": news_data.get("news", []),
-                "analysis": analysis,
-                "timestamp": datetime.now().isoformat(),
-                "price_history": stock_data.get("price_history", []),
-                "sma_50_history": stock_data.get("sma_50_history", []),
-                "sma_200_history": stock_data.get("sma_200_history", [])
-            }
-            
-        except Exception as e:
-            return {
-                "error": str(e),
-                "price": 0,
-                "sma_50": 0,
-                "sma_200": 0,
-                "news": [],
-                "timestamp": datetime.now().isoformat()
-            }
+    def analyze(self, ticker: str) -> Dict:
+        reasoning: List[str] = []
+        reasoning.append(f"Step 1: Fetching 1y history for {ticker}")
+        stock_data = self._get_stock_data(ticker)
+        reasoning.append(f"  → Got current price ${stock_data.get('current_price')}")
+
+        reasoning.append("Step 2: Computing SMAs")
+        # (you already compute sma_50 and sma_200 inside _get_stock_data)
+
+        reasoning.append("Step 3: Fetching top-3 news articles")
+        # simple rule: always fetch for now
+        news_data = self._get_news(ticker)
+        reasoning.append(f"  → Fetched {len(news_data.get('news',[]))} articles")
+
+        reasoning.append("Step 4: Summarizing & analyzing with Gemini")
+        analysis = self._generate_analysis(
+            ticker, 
+            stock_data["current_price"],
+            stock_data["sma_50"],
+            stock_data["sma_200"],
+            news_data["news"]
+        )
+        reasoning.append(f"  → Recommendation: {analysis.get('recommendation')}")
+
+        # at the end, return reasoning as well
+        # build your normal result dict first
+        result = {
+            "ticker":         ticker,
+            "price":          stock_data["current_price"],
+            "sma_50":         stock_data["sma_50"],
+            "sma_200":        stock_data["sma_200"],
+            "news":           news_data["news"],
+            "analysis":       analysis,
+            "timestamp":      datetime.now().isoformat(),
+            "price_history":  stock_data["price_history"],
+            "sma_50_history": stock_data["sma_50_history"],
+            "sma_200_history":stock_data["sma_200_history"],
+        }
+
+        # now add the reasoning log
+        result["reasoning"] = reasoning
+
+        return result
 
     def _get_stock_data(self, ticker: str) -> Dict:
         """Fetch price and technical indicators"""

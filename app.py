@@ -5,6 +5,7 @@ import pandas as pd
 from datetime import datetime
 from dotenv import load_dotenv
 import os
+import yfinance as yf
 
 # Load environment variables
 load_dotenv()
@@ -48,6 +49,9 @@ if analyze_btn and ticker:
                     delta=f"{(data['price'] - data['sma_200']) / data['sma_200'] * 100:.1f}%"
                 )
 
+                with st.expander("🧠 Agent Reasoning Log"):
+                     for line in data["reasoning"]:
+                        st.markdown(f"- {line}")
                 
                 # ===== Price Chart =====
                 st.subheader("📊 Price Trends")
@@ -71,11 +75,20 @@ if analyze_btn and ticker:
                     labels={"Value": "Price ($)", "Date": "Date"}
                 )
                 st.plotly_chart(fig, use_container_width=True)
-                
-                # ===== News Section =====
-                # Display News Section
-                st.subheader("📰 Latest News")
+                info = yf.Ticker(ticker).info
 
+                # Display them in two rows of columns
+                row1 = st.columns(4)
+                row1[0].metric("Open",       f"${info['open']:.2f}")
+                row1[1].metric("Day Low",    f"${info['dayLow']:.2f}")
+                row1[2].metric("Day High",   f"${info['dayHigh']:.2f}")
+                row1[3].metric("Volume",     f"{info['volume']:,}")
+
+                row2 = st.columns(2)
+                row2[0].metric("52W Low",    f"${info['fiftyTwoWeekLow']:.2f}")
+                row2[1].metric("52W High",   f"${info['fiftyTwoWeekHigh']:.2f}")
+                
+                # ===== News Section ==
                # Display News Section
                 st.subheader("📰 Top 3 News Articles")
 
