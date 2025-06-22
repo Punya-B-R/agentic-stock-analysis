@@ -5,6 +5,8 @@ import os
 from typing import List, Dict, Union
 from dotenv import load_dotenv
 import google.generativeai as genai
+from datetime import datetime
+from typing import List, Dict, Union
 
 load_dotenv()
 
@@ -21,49 +23,70 @@ class MarketAgent:
             "max_output_tokens": 1000,
         }
 
-    def analyze(self, ticker: str) -> Dict:
+# inside your MarketAgent class...
+
+    def analyze(self, ticker: str) -> Dict[str, Union[str, float, List]]:
+        """End-to-end agentic pipeline with reasoning log."""
         reasoning: List[str] = []
+
+        # Step 1: Fetch stock data
         reasoning.append(f"Step 1: Fetching 1y history for {ticker}")
         stock_data = self._get_stock_data(ticker)
-        reasoning.append(f"  → Got current price ${stock_data.get('current_price')}")
+        if "error" in stock_data:
+            return {**stock_data, "reasoning": reasoning}
 
-        reasoning.append("Step 2: Computing SMAs")
-        # (you already compute sma_50 and sma_200 inside _get_stock_data)
+        price   = stock_data["current_price"]
+        sma_50  = stock_data["sma_50"]
+        sma_200 = stock_data["sma_200"]
+        reasoning.append(f"  → Got price ${price:.2f}, SMA50 ${sma_50:.2f}, SMA200 ${sma_200:.2f}")
 
-        reasoning.append("Step 3: Fetching top-3 news articles")
-        # simple rule: always fetch for now
-        news_data = self._get_news(ticker)
-        reasoning.append(f"  → Fetched {len(news_data.get('news',[]))} articles")
+        # Step 2: Computing SMAs (already done above)
+        reasoning.append("Step 2: SMAs computed")
 
-        reasoning.append("Step 4: Summarizing & analyzing with Gemini")
+        # Step 3: Ask Gemini if news is needed
+        reasoning.append("Step 3: Asking Gemini if news is needed")
+        need_news = self._decide_need_news(price, sma_50, sma_200)
+        reasoning.append(f"  → Gemini says: {'Yes' if need_news else 'No'}")
+
+        # Step 4: Conditionally fetch news
+        if need_news:
+            reasoning.append("Step 4: Fetching top-3 news articles")
+            news_data = self._get_news(ticker)
+            count = len(news_data.get("news", []))
+            reasoning.append(f"  → Received {count} articles")
+        else:
+            reasoning.append("Step 4: Skipping news fetch")
+            news_data = {"news": []}
+
+        # Step 5: Summarize & analyze with Gemini
+        reasoning.append("Step 5: Generating recommendation with Gemini")
         analysis = self._generate_analysis(
-            ticker, 
-            stock_data["current_price"],
-            stock_data["sma_50"],
-            stock_data["sma_200"],
-            news_data["news"]
+            ticker=ticker,
+            price=price,
+            sma_50=sma_50,
+            sma_200=sma_200,
+            news_items=news_data["news"],
         )
-        reasoning.append(f"  → Recommendation: {analysis.get('recommendation')}")
+        verdict = analysis.get("recommendation", "N/A")
+        reasoning.append(f"  → Recommendation: {verdict}")
 
-        # at the end, return reasoning as well
-        # build your normal result dict first
+        # Build final result
         result = {
             "ticker":         ticker,
-            "price":          stock_data["current_price"],
-            "sma_50":         stock_data["sma_50"],
-            "sma_200":        stock_data["sma_200"],
-            "news":           news_data["news"],
+            "price":          price,
+            "sma_50":         sma_50,
+            "sma_200":        sma_200,
+            "news":           news_data.get("news", []),
             "analysis":       analysis,
             "timestamp":      datetime.now().isoformat(),
-            "price_history":  stock_data["price_history"],
-            "sma_50_history": stock_data["sma_50_history"],
-            "sma_200_history":stock_data["sma_200_history"],
+            "price_history":  stock_data.get("price_history", []),
+            "sma_50_history": stock_data.get("sma_50_history", []),
+            "sma_200_history":stock_data.get("sma_200_history", []),
+            "reasoning":      reasoning,
         }
 
-        # now add the reasoning log
-        result["reasoning"] = reasoning
-
         return result
+
 
     def _get_stock_data(self, ticker: str) -> Dict:
         """Fetch price and technical indicators"""
@@ -182,6 +205,32 @@ class MarketAgent:
             }
         except Exception as e:
             return f"Analysis error: {str(e)}"
+    
+    def _decide_need_news(self, price: float, sma_50: float, sma_200: float) -> bool:
+        """
+        Ask Gemini: given price and SMAs, do we need recent news
+        to make a better recommendation? Return True if yes.
+        """
+        prompt = f"""
+    We have the following data for a stock:
+    - Current Price: ${price:.2f}
+    - 50-Day SMA: ${sma_50:.2f}
+    - 200-Day SMA: ${sma_200:.2f}
+
+    Question: Do you need recent news articles to give a better
+    Buy/Hold/Sell recommendation? Answer ONLY "Yes" or "No".
+    """
+
+        try:
+            resp = self.llm.generate_content(
+                prompt,
+                generation_config=self.generation_config
+            ).text.strip().lower()
+            return resp.startswith("yes")
+        except:
+            # on LLM failure, default to fetching news
+            return True
+
 
     def _extract_recommendation(self, text: str) -> str:
         """Extract recommendation from Gemini response"""
