@@ -36,3 +36,37 @@ Unlike fixed rule-based tools, this copilot uses reasoning to support deeper, mo
 | **MACD**       | Identifies trend-following momentum and potential reversals |
 | **SMA (50/200)** | Highlights medium and long-term price trends             |
 | **Volatility** | Gauges risk by calculating percentage deviation in recent price movements |
+
+## Local Setup Guide
+### 1. **Install Python 3.9+**  
+   Download from [python.org](https://www.python.org/downloads/) then verify:
+   ```bash
+   python --version
+   ```
+
+### 2. Clone the Repository
+   ```bash
+   git clone <repository-url>
+   cd <repository-folder-name>
+   ```
+
+### 3. Set Up Virtual Environment
+   ```bash
+   python -m venv venv
+   venv\Scripts\activate # Windows
+   source venv/bin/activate # macOS/Linux
+   ```
+
+### 4. Install Dependencies
+   ```bash
+   pip install --upgrade pip
+   pip install -r requirements.txt
+   ```
+### 5. Configure API Key
+   - In project root, create an environment file.
+   - Get key from [Google AI Studio](https://aistudio.google.com/app/apikey) and [Tavily](https://app.tavily.com/home)
+   - Add to `.env`:
+     ```text
+     GEMINI_API_KEY="YOUR_API_KEY"  
+     TAVILY_API_KEY="YOUR_API_KEY"
+     ```
