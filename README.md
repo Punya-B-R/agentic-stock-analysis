@@ -15,3 +15,24 @@ This application does more than just present data — it operates as an **autono
 | **Adaptability**       | Updates recommendations based on evolving market and news data                     |
 
 Unlike fixed rule-based tools, this copilot uses reasoning to support deeper, more adaptive equity analysis.
+
+## 🔍 Features
+
+- Real-time price and technical indicators: **SMA (50/200)**, **RSI (14)**, **MACD**, **Volatility**
+- Intelligent news summarization using **Tavily AI**
+- Natural-language reasoning and insights powered by **Google Gemini**
+- Final actionable recommendation: **Buy / Hold / Sell**
+- Transparent agent reasoning log
+- Interactive trend visualization via **Plotly**
+- Fully autonomous — no manual inputs required
+
+---
+
+## Indicators Used
+
+| **Metric**     | **Use**                                                 |
+|----------------|----------------------------------------------------------|
+| **RSI (14)**   | Detects momentum by measuring overbought/oversold pressure using the last 14 periods |
+| **MACD**       | Identifies trend-following momentum and potential reversals |
+| **SMA (50/200)** | Highlights medium and long-term price trends             |
+| **Volatility** | Gauges risk by calculating percentage deviation in recent price movements |
