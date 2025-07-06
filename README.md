@@ -17,7 +17,7 @@ This application does more than just present data — it operates as an **autono
 Unlike fixed rule-based tools, this copilot uses reasoning to support deeper, more adaptive equity analysis.
 
 ## Dashboard Preview
-![Alt Text](https://github.com/Punya-B-R/agentic-stock-analyst-copilot/blob/main/assets/image.png?raw=true)
+![Alt Text](https://github.com/Punya-B-R/agentic-stock-analyst-copilot/blob/main/assets/picture.png?raw=true)
 
 ## 🔍 Features
 
