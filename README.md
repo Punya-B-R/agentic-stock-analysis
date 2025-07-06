@@ -1,4 +1,4 @@
-# 📈 AI Market Analyst Copilot
+# 📈 Agentic Stock Analyst Copilot
 
 An agentic AI-powered application that delivers real-time stock insights, technical indicator analysis, intelligent news summarization, and LLM-driven trading recommendations. At its core, this tool acts as a fully autonomous Market Research Agent — analyzing data, interpreting trends, summarizing external context, and forming its own conclusions, just like a human financial analyst.
 
@@ -15,6 +15,9 @@ This application does more than just present data — it operates as an **autono
 | **Adaptability**       | Updates recommendations based on evolving market and news data                     |
 
 Unlike fixed rule-based tools, this copilot uses reasoning to support deeper, more adaptive equity analysis.
+
+## Dashboard Preview
+![Alt Text](https://github.com/Punya-B-R/agentic-stock-analyst-copilot/blob/main/assets/image.png?raw=true)
 
 ## 🔍 Features
 
@@ -46,8 +49,8 @@ Unlike fixed rule-based tools, this copilot uses reasoning to support deeper, mo
 
 ### 2. Clone the Repository
    ```bash
-   git clone <repository-url>
-   cd <repository-folder-name>
+   git clone https://github.com/Punya-B-R/agentic-stock-analyst-copilot.git
+   cd agentic-stock-analyst-copilot
    ```
 
 ### 3. Set Up Virtual Environment
